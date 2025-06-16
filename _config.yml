@@ -13,7 +13,7 @@ kramdown:
 # Site settings
 title: Elbérich Hugo
 SEOTitle: Elbérich Hugo的个人博客
-header-img: img/myphoto.jpg
+header-img: img/post-bg-rwd.jpg
 email: 1246291596@qq.com
 description: "Le savant n'étudie pas la nature parce que cela est utile ; il l'étudie parce qu'il y prend plaisir et il y prend plaisir parce qu'elle est belle. Si la nature n'était pas belle, elle ne vaudrait pas la peine d'être connue, la vie ne vaudrait pas la peine d'être vécue.—— Henri Poincaré "
 keyword: "Elbérich Hugo, 物理学"
@@ -24,7 +24,7 @@ github_repo: "https://github.com/ElberichHugo/elberich.github.io" # you code rep
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "Goals determine what you going to be!"
-sidebar-avatar: /img/about-BY-gentle.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/myphoto.jpg     # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
