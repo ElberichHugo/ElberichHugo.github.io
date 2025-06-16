@@ -10,8 +10,7 @@ layout: default
                 <div class="site-heading">
                     <h1>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</h1>
                     <!--<hr class="small">-->
-                    <span class="subheading">{% if page.description %}{{ page.description }}{% else %}{{ "Le savant n'étudie pas la nature parce que cela est utile ;
-il l'étudie parce qu'il y prend plaisir et il y prend plaisir parce qu'elle est belle. —— Henri Poincaré" }}{% endif %}</span>
+                    <span class="subheading">{% if page.subtitle %}{{ page.subtitle }}{% else %}{{ page.description }}{% endif %}</span>
                 </div>
             </div>
         </div>
