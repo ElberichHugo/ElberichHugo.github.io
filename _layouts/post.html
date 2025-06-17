@@ -189,46 +189,10 @@ layout: default
 <!-- disqus 公共JS代码 end -->
 {% endif %}
 
-
-{% if site.anchorjs %}
-<!-- async load function -->
-<script>
-    function async(u, c) {
-      var d = document, t = 'script',
-          o = d.createElement(t),
-          s = d.getElementsByTagName(t)[0];
-      o.src = u;
-      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
-      s.parentNode.insertBefore(o, s);
-    }
-</script>
-<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
-<script>
-    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
-        // BY Fix:去除标题前的‘#’ issues:<https://github.com/qiubaiying/qiubaiying.github.io/issues/137>
-        // anchors.options = {
-        //   visible: 'always',
-        //   placement: 'right',
-        //   icon: '#'
-        // };
-        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
-    })
-</script>
-<style>
-    /* place left on bigger screen */
-    @media all and (min-width: 800px) {
-        .anchorjs-link{
-            position: absolute;
-            left: -0.75em;
-            font-size: 1.1em;
-            margin-top : -0.1em;
-        }
-    }
-</style>
-{% endif %}
-
-
-
+<!-- 添加KaTeX支持 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
 
 <script>
 // 自定义目录生成函数 - 只显示二级标题
@@ -261,87 +225,91 @@ function generateH2Catalog() {
     });
 }
 
-// 添加重渲染公式函数
-function rerenderMath() {
-  if (typeof MathJax !== 'undefined') {
-    MathJax.typesetPromise();
-  }
-}
-
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-  generateH2Catalog();
-  
-  // 延迟执行以确保所有内容加载完成
-  setTimeout(rerenderMath, 500);
-  
-  // 点击目录切换按钮
-  const catalogToggle = document.querySelector('.catalog-toggle');
-  if (catalogToggle) {
-    catalogToggle.addEventListener('click', function(e) {
-      e.preventDefault();
-      document.querySelector('.catalog-body').classList.toggle('show');
-      rerenderMath();
+    // 生成目录
+    generateH2Catalog();
+    
+    // 初始化KaTeX渲染
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+        ],
+        throwOnError: false
     });
-  }
+    
+    // 点击目录切换按钮
+    const catalogToggle = document.querySelector('.catalog-toggle');
+    if (catalogToggle) {
+        catalogToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const catalogBody = document.querySelector('.catalog-body');
+            if (catalogBody) {
+                catalogBody.classList.toggle('show');
+                
+                // 重新渲染公式，确保新显示的内容中的公式被渲染
+                renderMathInElement(catalogBody, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+    }
 });
 
 // 监听内容变化重新渲染公式
 if (typeof MutationObserver !== 'undefined') {
-  const observer = new MutationObserver(rerenderMath);
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: false,
-    characterData: false
-  });
+    const observer = new MutationObserver(function(mutations) {
+        // 重新渲染整个文档中的公式
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    });
 }
 </script>
 
 <style>
 /* 添加目录显示样式 */
+.catalog-body {
+    display: none;
+}
+
 .catalog-body.show {
     display: block;
 }
 
-/* 修复公式显示问题 */
-.MathJax {
-  overflow: auto hidden;
-  max-width: 100%;
+/* 修复KaTeX公式显示问题 */
+.katex {
+    font-size: 1.1em !important;
 }
 
-.MathJax_Display {
-  overflow-x: auto;
-  overflow-y: hidden;
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-.MathJax .math {
-  vertical-align: middle;
+/* 行内公式样式 */
+.katex-inline {
+    background-color: #f8f9fa;
+    padding: 0 4px;
+    border-radius: 4px;
 }
 </style>
-
-<!-- MathJax配置 -->
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-      processEscapes: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-    },
-    TeX: {
-      equationNumbers: {
-        autoNumber: "AMS"
-      }
-    },
-    "HTML-CSS": {
-      scale: 90
-    }
-  });
-</script>
-
-<!-- 加载MathJax 3 -->
-<script type="text/javascript" id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-
