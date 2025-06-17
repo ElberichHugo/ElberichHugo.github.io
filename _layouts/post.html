@@ -261,19 +261,41 @@ function generateH2Catalog() {
     });
 }
 
-// 页面加载完成后生成目录
+// 添加重渲染公式函数
+function rerenderMath() {
+  if (typeof MathJax !== 'undefined') {
+    MathJax.typesetPromise();
+  }
+}
+
+// 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    generateH2Catalog();
-    
-    // 点击目录切换按钮
-    const catalogToggle = document.querySelector('.catalog-toggle');
-    if (catalogToggle) {
-        catalogToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelector('.catalog-body').classList.toggle('show');
-        });
-    }
+  generateH2Catalog();
+  
+  // 延迟执行以确保所有内容加载完成
+  setTimeout(rerenderMath, 500);
+  
+  // 点击目录切换按钮
+  const catalogToggle = document.querySelector('.catalog-toggle');
+  if (catalogToggle) {
+    catalogToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelector('.catalog-body').classList.toggle('show');
+      rerenderMath();
+    });
+  }
 });
+
+// 监听内容变化重新渲染公式
+if (typeof MutationObserver !== 'undefined') {
+  const observer = new MutationObserver(rerenderMath);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: false,
+    characterData: false
+  });
+}
 </script>
 
 <style>
@@ -281,9 +303,24 @@ document.addEventListener('DOMContentLoaded', function() {
 .catalog-body.show {
     display: block;
 }
+
+/* 修复公式显示问题 */
+.MathJax {
+  overflow: auto hidden;
+  max-width: 100%;
+}
+
+.MathJax_Display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.MathJax .math {
+  vertical-align: middle;
+}
 </style>
 
-<!-- 添加MathJax配置 -->
+<!-- MathJax配置 -->
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {
@@ -296,8 +333,15 @@ document.addEventListener('DOMContentLoaded', function() {
       equationNumbers: {
         autoNumber: "AMS"
       }
+    },
+    "HTML-CSS": {
+      scale: 90
     }
   });
 </script>
 
+<!-- 加载MathJax 3 -->
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 
