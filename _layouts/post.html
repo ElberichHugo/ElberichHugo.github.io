@@ -191,8 +191,8 @@ layout: default
 
 <!-- 添加KaTeX支持 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
 
 <script>
 // 自定义目录生成函数 - 只显示二级标题
@@ -225,20 +225,32 @@ function generateH2Catalog() {
     });
 }
 
+// KaTeX渲染函数
+function renderKatex() {
+    // 确保auto-render已加载
+    if (typeof renderMathInElement === 'function') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false,
+            output: 'html'
+        });
+    } else {
+        // 如果未加载，稍后重试
+        setTimeout(renderKatex, 100);
+    }
+}
+
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     // 生成目录
     generateH2Catalog();
     
     // 初始化KaTeX渲染
-    renderMathInElement(document.body, {
-        delimiters: [
-            {left: '$$', right: '$$', display: true},
-            {left: '\\(', right: '\\)', display: false},
-            {left: '\\[', right: '\\]', display: true}
-        ],
-        throwOnError: false
-    });
+    renderKatex();
     
     // 点击目录切换按钮
     const catalogToggle = document.querySelector('.catalog-toggle');
@@ -249,33 +261,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (catalogBody) {
                 catalogBody.classList.toggle('show');
                 
-                // 重新渲染公式，确保新显示的内容中的公式被渲染
-                renderMathInElement(catalogBody, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '\\(', right: '\\)', display: false},
-                        {left: '\\[', right: '\\]', display: true}
-                    ],
-                    throwOnError: false
-                });
+                // 重新渲染公式
+                setTimeout(renderKatex, 50);
             }
         });
     }
 });
 
-// 监听内容变化重新渲染公式
+// 简单的防抖函数，避免频繁重渲染
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(func, wait);
+    };
+}
+
+// 监听内容变化重新渲染公式（使用防抖）
 if (typeof MutationObserver !== 'undefined') {
-    const observer = new MutationObserver(function(mutations) {
-        // 重新渲染整个文档中的公式
-        renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });
-    });
+    const observer = new MutationObserver(debounce(renderKatex, 300));
     
     observer.observe(document.body, {
         childList: true,
@@ -290,6 +294,8 @@ if (typeof MutationObserver !== 'undefined') {
 /* 添加目录显示样式 */
 .catalog-body {
     display: none;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .catalog-body.show {
@@ -304,6 +310,7 @@ if (typeof MutationObserver !== 'undefined') {
 .katex-display {
     overflow-x: auto;
     overflow-y: hidden;
+    padding: 10px 0;
 }
 
 /* 行内公式样式 */
@@ -311,5 +318,12 @@ if (typeof MutationObserver !== 'undefined') {
     background-color: #f8f9fa;
     padding: 0 4px;
     border-radius: 4px;
+    display: inline-block;
+}
+
+/* 防止公式溢出 */
+.katex-display > .katex {
+    display: inline-block;
+    white-space: nowrap;
 }
 </style>
