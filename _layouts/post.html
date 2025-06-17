@@ -226,3 +226,59 @@ layout: default
     }
 </style>
 {% endif %}
+
+
+
+
+<script>
+// 自定义目录生成函数 - 只显示二级标题
+function generateH2Catalog() {
+    const catalogBody = document.querySelector('.catalog-body');
+    if (!catalogBody) return;
+    
+    // 清空现有目录
+    catalogBody.innerHTML = '';
+    
+    // 获取所有二级标题
+    const h2Elements = document.querySelectorAll('.post-container h2');
+    
+    h2Elements.forEach(h2 => {
+        // 确保标题有ID（用于锚点链接）
+        if (!h2.id) {
+            h2.id = 'heading-' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // 创建目录项
+        const listItem = document.createElement('li');
+        listItem.className = 'catalog-item';
+        
+        const link = document.createElement('a');
+        link.href = '#' + h2.id;
+        link.textContent = h2.textContent;
+        
+        listItem.appendChild(link);
+        catalogBody.appendChild(listItem);
+    });
+}
+
+// 页面加载完成后生成目录
+document.addEventListener('DOMContentLoaded', function() {
+    generateH2Catalog();
+    
+    // 点击目录切换按钮
+    const catalogToggle = document.querySelector('.catalog-toggle');
+    if (catalogToggle) {
+        catalogToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('.catalog-body').classList.toggle('show');
+        });
+    }
+});
+</script>
+
+<style>
+/* 添加目录显示样式 */
+.catalog-body.show {
+    display: block;
+}
+</style>
