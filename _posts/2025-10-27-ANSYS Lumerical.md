@@ -2,7 +2,7 @@
 layout: post
 title: "ANSYS Lumerical"
 subtitle: "ANSYS Lumerical"
-date: 2025-06-15
+date: 2025-10-27
 author: Elberich
 header-img: "img/post-bg-2015.jpg"
 catalog: true
